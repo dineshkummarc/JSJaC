@@ -136,7 +136,7 @@ JSJaCConnection.prototype.connect = function(oArg) {
   else
     this.secure = 'false';
 
-  if (oArg.wait)
+  if (typeof(oArg.wait) !== 'undefined')
     this._wait = oArg.wait;
 
   this.jid = this.username + '@' + this.domain;
