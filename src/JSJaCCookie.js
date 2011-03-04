@@ -81,7 +81,7 @@ function JSJaCCookie(name,value,secs,domain,path)
    * Deletes this cookie
    */
   this.erase = function() {
-    var c = new JSJaCCookie(this.getName(),"",-1);
+    var c = new JSJaCCookie(this.getName(),"",-1,this.getDomain());
     c.write();
   };
 
@@ -123,6 +123,10 @@ function JSJaCCookie(name,value,secs,domain,path)
   this.setValue = function(value) {
     this.value = value;
     return this;
+  };
+
+  this.getDomain = function() {
+	  return this.domain;
   };
 
   /**

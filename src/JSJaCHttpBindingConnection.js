@@ -465,8 +465,15 @@ JSJaCHttpBindingConnection.prototype._resume = function() {
   /* make sure to repeat last request as we can be sure that
    * it had failed (only if we're not using the 'pause' attribute
    */
-  if (this._pause == 0 && this._rid >= this._last_rid)
-    this._rid = this._last_rid-1;
+
+/*
+ * Commented out the following two lines for it to work with punjab. JSJaC is
+ * expecting the rid to stay the same for the last request because it fails,
+ * but punjab is expecting the rid to increment anyway and will throw a 404
+ * error if the rid isn't incremented as soon as the next page is loaded.
+ */
+//  if (this._pause == 0 && this._rid >= this._last_rid)
+//    this._rid = this._last_rid-1;
 
   this._process();
 };

@@ -56,6 +56,14 @@ function JSJaCConnection(oArg) {
   else
     this._cookie_prefix = "";
 
+  if (oArg && oArg.cookie_domain)
+  /**
+   * @private
+   */
+	this._cookie_domain = oArg.cookie_domain;
+  else
+	this._cookie_domain = "";
+
   /**
    * @private
    */
@@ -376,7 +384,9 @@ JSJaCConnection.prototype.resume = function() {
   try {
     var json = JSJaCCookie.read(this._cookie_prefix+'JSJaC_State').getValue(); 
     this.oDbg.log('read cookie: '+json,2);
-    JSJaCCookie.read(this._cookie_prefix+'JSJaC_State').erase();
+    var c = JSJaCCookie.read(this._cookie_prefix+'JSJaC_State');
+	c.setDomain(this._cookie_domain);
+	c.erase();
 
     return this.resumeFromData(JSJaCJSON.parse(json));
   } catch (e) {}
@@ -548,6 +558,8 @@ JSJaCConnection.prototype.suspend = function() {
     var c = new JSJaCCookie(this._cookie_prefix+'JSJaC_State', JSJaCJSON.toString(data));
     this.oDbg.log("writing cookie: "+c.getValue()+"\n"+
                   "(length:"+c.getValue().length+")",2);
+
+    c.setDomain(this._cookie_domain);
     c.write();
 
     var c2 = JSJaCCookie.get(this._cookie_prefix+'JSJaC_State');
