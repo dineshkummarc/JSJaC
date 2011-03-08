@@ -176,7 +176,7 @@ JSJaCPacket.prototype.getXMLLang = function() {
  * @type String
  */
 JSJaCPacket.prototype.getXMLNS = function() {
-  return this.getNode().namespaceURI;
+  return this.getNode().namespaceURI || this.getNode().getAttribute('xmlns');
 };
 
 /**
@@ -202,7 +202,7 @@ JSJaCPacket.prototype.getChild = function(name, ns) {
   var nodes = this.getNode().getElementsByTagName(name);
   if (ns != '*') {
     for (var i=0; i<nodes.length; i++) {
-      if (nodes.item(i).namespaceURI == ns) {
+      if (nodes.item(i).namespaceURI == ns || nodes.item(i).getAttribute('xmlns') == ns) {
         return nodes.item(i);
       }
     }
@@ -318,31 +318,32 @@ JSJaCPacket.prototype._importNode = function(node, allChildren) {
   switch (node.nodeType) {
   case document.ELEMENT_NODE:
 
-  if (document.createElementNS) {
+  if (this.getDoc().createElementNS) {
     var newNode = this.getDoc().createElementNS(node.namespaceURI, node.nodeName);
   } else {
     var newNode = this.getDoc().createElement(node.nodeName);
-    newNode.setAttribute('xmlns', node.namespaceURI)
   }
 
   /* does the node have any attributes to add? */
   if (node.attributes && node.attributes.length > 0)
     for (var i = 0, il = node.attributes.length;i < il; i++) {
       var attr = node.attributes.item(i);
-      if (attr.nodeName == 'xmlns') continue;
-				if (newNode.setAttributeNS && attr.namespaceURI) {
-                                  newNode.setAttributeNS(attr.namespaceURI,
-                                                         attr.nodeName,
-                                                         attr.nodeValue);
-				} else {
-                                  newNode.setAttribute(attr.nodeName,
-                                                       attr.nodeValue);
-				}
+      if (attr.nodeName == 'xmlns' && newNode.getAttribute('xmlns') != null ) continue;
+      if (newNode.setAttributeNS && attr.namespaceURI) {
+        newNode.setAttributeNS(attr.namespaceURI,
+                               attr.nodeName,
+                               attr.nodeValue);
+      } else {
+        newNode.setAttribute(attr.nodeName,
+                             attr.nodeValue);
+      }
     }
   /* are we going after children too, and does the node have any? */
-  if (allChildren && node.childNodes && node.childNodes.length > 0)
-    for (var i = 0, il = node.childNodes.length; i < il; i++)
+  if (allChildren && node.childNodes && node.childNodes.length > 0) {
+    for (var i = 0, il = node.childNodes.length; i < il; i++) {
       newNode.appendChild(this._importNode(node.childNodes.item(i), allChildren));
+    }
+  }
   return newNode;
   break;
   case document.TEXT_NODE:
@@ -582,10 +583,11 @@ JSJaCIQ.prototype.getQuery = function() {
  * @type String
  */
 JSJaCIQ.prototype.getQueryXMLNS = function() {
-  if (this.getQuery())
-    return this.getQuery().namespaceURI;
-  else
+  if (this.getQuery()) {
+    return this.getQuery().namespaceURI || this.getQuery().getAttribute('xmlns');
+  } else {
     return null;
+  }
 };
 
 /**
